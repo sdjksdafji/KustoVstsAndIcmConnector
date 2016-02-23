@@ -39,9 +39,6 @@ namespace VSTSConnector
 
 		private static void GetResolvedShipBlockingBugs(string currentBuild)
 		{
-			List<ActiveShipBlockingBug> dataToIngest = new List<ActiveShipBlockingBug>();
-
-
 			// create a new BugClient to the VSTS instance for Office
 			BugClient client = new BugClient(BugClient.Server.Live);
 
@@ -56,40 +53,27 @@ namespace VSTSConnector
 			StreamWriter file = new StreamWriter("ShipBlocking.csv",false);
 			for (int i = 0; i < result.Bugs.Count; i++)
 			{
-				//dataToIngest.Add(new ActiveShipBlockingBug(Int64.Parse(result.Bugs[i].Fields["ID"]),
-				//	result.Bugs[i].Fields["OpenedBy"],
-				//	result.Bugs[i].Fields["Area"],
-				//	Convert.ToDateTime(result.Bugs[i].Fields["OpenedDate"]),
-				//	result.Bugs[i].Fields["OpenedRev"]));
-				//            foreach (KeyValuePair<string, string> field	 in result.Bugs[i].Fields)
-				//{
-
-				//	file.Write(/*field.Key + ":" + */field.Value);
-				//	file.Write(",");
-				//}
-				file.Write(result.Bugs[i].Fields["ID"]);
-				file.Write(",");
+				file.Write("\"");
+                file.Write(result.Bugs[i].Fields["ID"]);
+				file.Write("\",\"");
 				file.Write(result.Bugs[i].Fields["OpenedBy"]);
-				file.Write(",");
+				file.Write("\",\"");
 				file.Write(result.Bugs[i].Fields["Area"]);
-				file.Write(",");
+				file.Write("\",\"");
 				file.Write(result.Bugs[i].Fields["OpenedDate"]);
-				file.Write(",");
+				file.Write("\",\"");
 				file.Write(result.Bugs[i].Fields["OpenedRev"]);
-				file.Write(",");
+				file.Write("\",");
 				file.WriteLine();
 			}
-			Console.WriteLine("Length: " + dataToIngest.Count);
 			file.Flush();
 			file.Close();
-			Console.WriteLine("Now try to upload to Kusto sycnly");
-			Console.ReadKey();
-			IngestToKusto(dataToIngest);
+			Console.WriteLine("Now try to upload to Kusto syncly");
+			IngestToKusto();
             Console.WriteLine("Uploading succeeded");
-			Console.ReadKey();
 		}
 
-		private static void IngestToKusto(IEnumerable<ActiveShipBlockingBug> dataToIngest)
+		private static void IngestToKusto()
 		{
 			var kustoConnectionStringBuilderEngine = new Kusto.Data.KustoConnectionStringBuilder(@"https://wacprod.kusto.windows.net")
 			{
@@ -112,41 +96,5 @@ namespace VSTSConnector
 		{
 			throw new NotImplementedException();
 		}
-	}
-
-	class ActiveShipBlockingBug
-	{
-		public ActiveShipBlockingBug()
-		{
-
-		}
-
-
-		//var csvMapping = new List<Kusto.Data.Common.CsvColumnMapping>();
-		//csvMapping.Add(new Kusto.Data.Common.CsvColumnMapping() { ColumnName = "ID", Ordinal = 0, CslDataType = "int" });
-		//	csvMapping.Add(new Kusto.Data.Common.CsvColumnMapping() { ColumnName = "OpenedBy", Ordinal = 1, CslDataType = "string" });
-		//	csvMapping.Add(new Kusto.Data.Common.CsvColumnMapping() { ColumnName = "Area", Ordinal = 2, CslDataType = "string" });
-		//	csvMapping.Add(new Kusto.Data.Common.CsvColumnMapping() { ColumnName = "OpenedDate", Ordinal = 3, CslDataType = "datetime" });
-		//	csvMapping.Add(new Kusto.Data.Common.CsvColumnMapping() { ColumnName = "OpenedRev", Ordinal = 4, CslDataType = "string" });
-		//	string csvMappingString = Newtonsoft.Json.JsonConvert.SerializeObject(csvMapping);
-
-public ActiveShipBlockingBug(long id, string openedBy, string area, DateTime openedDate, string openedRev)
-		{
-			ID = id;
-			OpenedBy = openedBy;
-			Area = area;
-			OpenedDate = openedDate;
-			OpenedRev = openedRev;
-		}
-
-		public long ID { get; set; }
-
-		public string OpenedBy { get; set; }
-
-		public string Area { get; set; }
-
-		public DateTime OpenedDate { get; set; }
-
-		public string OpenedRev { get; set; }
 	}
 }
