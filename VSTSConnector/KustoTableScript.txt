@@ -1,2 +1,5 @@
 ﻿VSTS:
 .create table ShipBlockingBugs (ID:int, OpenedBy: string, Area: string, OpenedDate: datetime, OpenedRev: string)
+
+ICM:
+.create table IcmIncidents (IncidentId:int, Title: string, SourceName:string, OpenDate: datetime, ResolveDate:datetime, InitiatedBy:string, OccurringEnvironment:string, OccurringDatacenter:string, TeamAssignedTo:string, AssignedTo:string, ParentIncidentId:int, Severity:int, IsNoise:bool, IsCustomerImpacting:bool)

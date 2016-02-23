@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
+using Kusto.Ingest;
 
 namespace VSTSConnector
 {
@@ -26,23 +27,28 @@ namespace VSTSConnector
 			
 					connection.Open();
 					reader = command.ExecuteReader();
-					//connection.Close();
-				
+			//connection.Close();
 
-			StreamWriter file = new StreamWriter("ICMIncidents.txt", false);
-			while (reader.Read())
+
+			using (StreamWriter file = new StreamWriter("ICMIncidents.csv", false))
 			{
-				for (int j = 0; j < reader.FieldCount; j++)
+				while (reader.Read())
 				{
-					//Console.WriteLine(reader[j].ToString());
-					file.Write(reader[j].ToString());
-					file.Write("\t");
+					Console.WriteLine(reader.FieldCount);
+					for (int j = 0; j < reader.FieldCount; j++)
+					{
+						file.Write("\"");
+						file.Write(reader[j].ToString());
+						file.Write("\",");
+					}
+					file.Flush();
+					file.WriteLine();
 				}
-				file.Flush();
-				file.WriteLine();
+				reader.Close();
 			}
-			reader.Close();
-		}
+
+			IngestToKusto();
+        }
 
 		private void GetSqlConnectionString()
 		{
@@ -52,6 +58,26 @@ namespace VSTSConnector
 										   "User id = meghnas;" +
 										   "Password = gafeisScTyuYBa6;";
 		}
+
+		private void IngestToKusto()
+		{
+			var kustoConnectionStringBuilderEngine = new Kusto.Data.KustoConnectionStringBuilder(@"https://wacprod.kusto.windows.net")
+			{
+				FederatedSecurity = true,
+			};
+
+			//Create a disposable client that will execute the ingestion
+			using (IKustoIngestClient client = new KustoDirectIngestClient(kustoConnectionString: kustoConnectionStringBuilderEngine))
+			{
+
+				string kustoDatabase = "ULS";
+				string kustoTable = "IcmIncidents";
+				var kustoIngestionProperties = new KustoIngestionProperties(databaseName: kustoDatabase, tableName: kustoTable);
+
+				client.IngestFromSingleFile(@"C:\Users\shuywang\Documents\Visual Studio 2015\Projects\VSTSConnector\VSTSConnector\bin\Debug\ICMIncidents.csv", false, kustoIngestionProperties);
+			}
+		}
+
 
 		/// <summary>
 		/// <remarks>
