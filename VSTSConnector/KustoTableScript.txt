@@ -1,0 +1,2 @@
+﻿VSTS:
+.create table ShipBlockingBugs (ID:int, OpenedBy: string, Area: string, OpenedDate: datetime, OpenedRev: string)
