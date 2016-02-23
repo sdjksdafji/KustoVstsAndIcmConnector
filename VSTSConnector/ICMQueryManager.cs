@@ -55,8 +55,8 @@ namespace VSTSConnector
 			connection = new SqlConnection();
 			connection.ConnectionString = "Data Source = aesv0zny1o.database.windows.net;" +
 										   "Initial Catalog = IcMDataWarehouse;" +
-										   "User id = meghnas;" +
-										   "Password = gafeisScTyuYBa6;";
+										   "User id = username;" +
+										   "Password = password;";
 		}
 
 		private void IngestToKusto()
